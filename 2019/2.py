@@ -12,6 +12,6 @@ print(runprog(prog,12,2))
 # Part II
 for i in range(100):
     for j in range(100):
-        if runprog(prog, i, j) == 19690720:
+        if runprog(prog, i, j)[0] == 19690720:
             print(100 * i + j)
 
