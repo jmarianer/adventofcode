@@ -1,17 +1,4 @@
-def runprog(prog, n, v):
-    prog = list(prog)
-    prog[1] = n
-    prog[2] = v
-    cur = 0
-    while prog[cur] != 99:
-        x = prog[prog[cur+1]]
-        y = prog[prog[cur+2]]
-        op = prog[cur]
-        out = x+y if op == 1 else x*y
-        prog[prog[cur+3]] = out
-        cur += 4
-
-    return prog[0]
+from intcode import runprog
 
 prog = [1,0,0,3,1,1,2,3,1,3,4,3,1,5,0,3,2,1,10,19,1,6,19,23,2,23,6,27,2,6,27,31,
         2,13,31,35,1,10,35,39,2,39,13,43,1,43,13,47,1,6,47,51,1,10,51,55,2,55,6,
