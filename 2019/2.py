@@ -6,12 +6,20 @@ prog = [1,0,0,3,1,1,2,3,1,3,4,3,1,5,0,3,2,1,10,19,1,6,19,23,2,23,6,27,2,6,27,31,
         87,1,13,87,91,1,91,10,95,2,9,95,99,1,5,99,103,2,10,103,107,1,107,2,111,
         1,111,5,0,99,2,14,0,0]
 
+def run(n,v):
+    myprog = list(prog)
+    myprog[1] = n
+    myprog[2] = v
+    list(runprog(myprog))
+    return myprog[0]
+
+
 # Part I
-print(runprog(prog,12,2))
+print(run(12,2))
 
 # Part II
 for i in range(100):
     for j in range(100):
-        if runprog(prog, i, j)[0] == 19690720:
+        if run(i, j) == 19690720:
             print(100 * i + j)
 
