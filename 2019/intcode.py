@@ -1,39 +1,55 @@
-def getparam(prog, cur, paramno):
-    param_mode = prog[cur] // (10**(paramno+1)) % 10
-    param = prog[cur + paramno]
-    return param if param_mode == 1 else prog[param]
-
-def runprog(prog, inpt=iter([])):
-    output = []
+class Prog(list):
+    def __setitem__(self, index, value):
+        if index >= len(self):
+            self.extend([None]*(index + 1 - len(self)))
+        list.__setitem__(self, index, value)
 
     cur = 0
-    while prog[cur] != 99:
-        op = prog[cur] % 100
-        if op == 1:
-            prog[prog[cur+3]] = getparam(prog, cur, 1) + getparam(prog, cur, 2)
-            cur += 4
-        elif op == 2:
-            prog[prog[cur+3]] = getparam(prog, cur, 1) * getparam(prog, cur, 2)
-            cur += 4
-        elif op == 3:
-            prog[prog[cur+1]] = next(inpt)
-            cur += 2
-        elif op == 4:
-            yield getparam(prog, cur, 1)
-            cur += 2
-        elif op == 5:
-            if getparam(prog, cur, 1) != 0:
-                cur = getparam(prog, cur, 2)
-            else:
-                cur += 3
-        elif op == 6:
-            if getparam(prog, cur, 1) == 0:
-                cur = getparam(prog, cur, 2)
-            else:
-                cur += 3
-        elif op == 7:
-            prog[prog[cur+3]] = 1 if getparam(prog, cur, 1) < getparam(prog, cur, 2) else 0
-            cur += 4
-        elif op == 8:
-            prog[prog[cur+3]] = 1 if getparam(prog, cur, 1) == getparam(prog, cur, 2) else 0
-            cur += 4
+    rel = 0
+
+    def param_mode(self, paramno):
+        return self[self.cur] // (10**(paramno+1)) % 10
+
+    def get(self, paramno):
+        param = self[self.cur + paramno]
+        return param if self.param_mode(paramno) == 1 else self[param]
+
+    def set(self, paramno, val):
+        param = self[self.cur + paramno]
+        if self.param_mode(paramno) == 0:
+            self[param] = val
+        else:
+            self[param + self.rel] = val
+
+    def run(self, inpt=iter([])):
+        self.cur = 0
+        self.rel = 0
+
+        param_count = [0, 3, 3, 1, 1, 2, 2, 3, 3]
+
+        while self[self.cur] != 99:
+            jumped = False
+            op = self[self.cur] % 100
+            if op == 1:
+                self.set(3, self.get(1) + self.get(2))
+            elif op == 2:
+                self.set(3, self.get(1) * self.get(2))
+            elif op == 3:
+                self.set(3, next(inpt))
+            elif op == 4:
+                yield self.get(1)
+            elif op == 5:
+                if self.get(1) != 0:
+                    self.cur = self.get(2)
+                    jumped = True
+            elif op == 6:
+                if self.get(1) == 0:
+                    self.cur = self.get(2)
+                    jumped = True
+            elif op == 7:
+                self.set(3, 1 if self.get(1) < self.get(2) else 0)
+            elif op == 8:
+                self.set(3, 1 if self.get(1) == self.get(2) else 0)
+
+            if not jumped:
+                self.cur += param_count[op] + 1
