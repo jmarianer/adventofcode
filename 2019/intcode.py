@@ -35,7 +35,7 @@ class Prog(list):
             elif op == 2:
                 self.set(3, self.get(1) * self.get(2))
             elif op == 3:
-                self.set(3, next(inpt))
+                self.set(1, next(inpt))
             elif op == 4:
                 yield self.get(1)
             elif op == 5:
