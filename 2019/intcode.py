@@ -12,7 +12,13 @@ class Prog(list):
 
     def get(self, paramno):
         param = self[self.cur + paramno]
-        return param if self.param_mode(paramno) == 1 else self[param]
+        mode = self.param_mode(paramno)
+        if mode == 0:
+            return self[param]
+        elif mode == 1:
+            return param
+        elif mode == 2:
+            return self[self.rel + param]
 
     def set(self, paramno, val):
         param = self[self.cur + paramno]
@@ -25,7 +31,7 @@ class Prog(list):
         self.cur = 0
         self.rel = 0
 
-        param_count = [0, 3, 3, 1, 1, 2, 2, 3, 3]
+        param_count = [0, 3, 3, 1, 1, 2, 2, 3, 3, 1]
 
         while self[self.cur] != 99:
             jumped = False
@@ -50,6 +56,8 @@ class Prog(list):
                 self.set(3, 1 if self.get(1) < self.get(2) else 0)
             elif op == 8:
                 self.set(3, 1 if self.get(1) == self.get(2) else 0)
+            elif op == 9:
+                self.rel += self.get(1)
 
             if not jumped:
                 self.cur += param_count[op] + 1
