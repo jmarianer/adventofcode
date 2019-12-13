@@ -1,15 +1,18 @@
 import re, sys
 from collections import defaultdict
 
-steps = set()
+all_steps = set()
 before = defaultdict(set)
 
 for line in sys.stdin:
     match = re.match('Step (.) must be finished before step (.) can begin.', line)
-    steps.add(match[1])
-    steps.add(match[2])
+    all_steps.add(match[1])
+    all_steps.add(match[2])
     before[match[1]].add(match[2])
 
+
+# Part I
+steps = set(all_steps)
 order = ''
 while len(steps) > 0:
     availablesteps = set(steps)
@@ -22,3 +25,5 @@ while len(steps) > 0:
     steps.remove(step)
 
 print(order)
+
+# Part II
