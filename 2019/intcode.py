@@ -4,6 +4,11 @@ class Prog(list):
             self.extend([None]*(index + 1 - len(self)))
         list.__setitem__(self, index, value)
 
+    def __getitem__(self, index):
+        if index >= len(self):
+            return 0
+        return list.__getitem__(self, index)
+
     cur = 0
     rel = 0
 
