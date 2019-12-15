@@ -1,4 +1,6 @@
+import time
 from intcode import Prog
+from collections import defaultdict
 import more_itertools
 
 prog = [1, 380, 379, 385, 1008, 2445, 260599, 381, 1005, 381, 12, 99, 109,
@@ -132,7 +134,34 @@ prog = [1, 380, 379, 385, 1008, 2445, 260599, 381, 1005, 381, 12, 99, 109,
         76, 2, 95, 34, 21, 83, 87, 47, 15, 89, 28, 23, 73, 57, 64, 89, 29, 69,
         68, 81, 80, 60, 260599]
 
-field = {}
+field = defaultdict(lambda: 0)
+
+# Part I
 for x, y, i in more_itertools.chunked(Prog(prog).run(), 3):
     field[x, y] = i
 print(len([v for v in field.values() if v == 2]))
+
+# Part II
+display = ' █░▔*'
+
+def input_iter():
+    while True:
+#        for y in range(20):
+#            line = (display[field[x, y]] for x in range(50))
+#            print(''.join(line))
+        print(field[-1, 0], len([v for v in field.values() if v == 2]))
+
+        paddle, = [k for k, v in field.items() if v == 3]
+        ball,   = [k for k, v in field.items() if v == 4]
+        if paddle[0] > ball[0]:
+            yield -1
+        elif paddle[0] < ball[0]:
+            yield 1
+        else:
+            yield 0
+        #time.sleep(0.1)
+
+prog[0] = 2
+for x, y, i in more_itertools.chunked(Prog(prog).run(input_iter()), 3):
+    field[x, y] = i
+print(field[-1, 0], len([v for v in field.values() if v == 2]))
