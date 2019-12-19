@@ -31,19 +31,45 @@ prog = [109, 424, 203, 1, 21102, 11, 1, 0, 1105, 1, 282, 21101, 18, 0, 0, 1106,
         -4, 22202, -3, -2, -3, 21202, -4, -1, -2, 22201, -3, -2, 1, 21201, 1,
         0, -4, 109, -5, 2105, 1, 0]
 
-SIZE=100
+def get_stat(i, j):
+    return more_itertools.first(Prog(prog).run(iter([i, j])))
 
-tot = 0
-for i in range(SIZE):
-    for j in range(SIZE):
-        out = more_itertools.first(Prog(prog).run(iter([i, j])))
-        if out == 1:
-            tot += 1
-            print('#', end='')
-        else:
-            print('.', end='')
+SIZE=50
 
-    print()
+#tot = 0
+#for i in range(SIZE):
+#    for j in range(SIZE):
+#        out = get_stat(i, j)
+#        if out == 1:
+#            tot += 1
+#            print('#', end='')
+#        else:
+#            print('.', end='')
+#
+#    print()
+#
+#print(tot)
 
+# Part II
+current = (50, 50)
+field_desc = {}
+MAX_I = 5000
+# 550 below = trial and error, a value of i that is known to be a row that is too narrow.
+for i in range(550, MAX_I):
+    for j in itertools.count(current[0]):
+        if get_stat(i, j) == 1:
+            start = j
+            break
+    for j in itertools.count(start + current[1] - current[0]):
+        if get_stat(i, j) == 0:
+            end = j
+            break
+    current = (start, end)
+    field_desc[i] = current
 
-print(tot)
+for i in range(550, MAX_I):
+    square_start = max(field_desc[i1][0] for i1 in range(i, i+100))
+    square_end = min(field_desc[i1][1] for i1 in range(i, i+100))
+    if square_end - square_start >= 100:
+        print(i, square_start)
+        break
