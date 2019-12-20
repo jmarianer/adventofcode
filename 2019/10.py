@@ -1,17 +1,11 @@
-import sys
-from fractions import Fraction
+import sys, math
 
 asteroid_locations = []
 for i, line in enumerate(sys.stdin.readlines()):
     asteroid_locations.extend((j, i) for j in range(len(line)) if line[j] == '#')
 
 def direction(loc1, loc2):
-    if loc1[1] == loc2[1]:
-        return (-1, 0) if loc2[0] > loc1[0] else (1, 0)
-    
-    frac = Fraction(loc1[0] - loc2[0], loc1[1] - loc2[1])
-    dir = -1 if loc2[1] > loc1[1] else 1
-    return (dir * frac.numerator, dir * frac.denominator)
+    return math.atan2(loc1[1] - loc2[1], loc1[0] - loc2[0]) * 180 / math.pi
 
 detector = ()
 detected = set()
@@ -23,3 +17,10 @@ for loc in asteroid_locations:
 
 print(detector)
 print(len(detected))
+
+# The laser starts pointing at angle -90deg
+detected = sorted(detected)
+detected = [angle for angle in detected if angle >= -90] + [angle for angle in detected if angle < -90]
+angle = detected[199]
+print(angle)
+print(list(loc2 for loc2 in asteroid_locations if loc2 != detector and direction(loc2, detector) == angle))
