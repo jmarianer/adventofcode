@@ -1,5 +1,5 @@
 from intcode import Prog
-import more_itertools
+import itertools, more_itertools
 
 prog = [109, 2050, 21101, 0, 966, 1, 21101, 0, 13, 0, 1106, 0, 1378, 21102, 20,
         1, 0, 1105, 1, 1337, 21101, 0, 27, 0, 1105, 1, 1279, 1208, 1, 65, 748,
@@ -137,10 +137,21 @@ prog = [109, 2050, 21101, 0, 966, 1, 21101, 0, 13, 0, 1106, 0, 1378, 21102, 20,
         21101, 0, 2037, 0, 106, 0, 1912, 21202, -3, -1, -3, 22201, -5, -3, -5,
         109, -6, 2105, 1, 0]
 
+# Part I
 instructions = 'NOT A J\nNOT B T\nOR T J\nNOT C T\nOR T J\nAND D J\nWALK\n'
+# Part II
+instructions = 'NOT A J\nNOT B T\nOR T J\nNOT C T\nOR T J\nAND D J\nNOT H T\nNOT T T\nOR E T\nAND T J\nRUN\n'
 output = Prog(prog).run(ord(c) for c in instructions)
-print(list(output))
+print(more_itertools.last(output))
+output = (chr(i) for i in output)
 
 lines = more_itertools.split_at(output, lambda x: x == '\n')
 for line in lines:
     print(''.join(line))
+
+for x in itertools.product('#.', repeat=9):
+    line = ''.join(x)
+    if line.startswith('.') or line.startswith('#...') or line[4] == '.':
+        continue
+    if '....' not in line:
+        print(line)
