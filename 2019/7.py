@@ -1,6 +1,6 @@
 from intcode import Prog
-import itertools
-import queue
+import itertools, queue
+from utils import queue_iterator
 
 prog = [3, 8, 1001, 8, 10, 8, 105, 1, 0, 0, 21, 30, 47, 60, 81, 102, 183, 264,
         345, 426, 99999, 3, 9, 1002, 9, 5, 9, 4, 9, 99, 3, 9, 1002, 9, 5, 9,
@@ -30,20 +30,16 @@ prog = [3, 8, 1001, 8, 10, 8, 105, 1, 0, 0, 21, 30, 47, 60, 81, 102, 183, 264,
 
 
 # Part I
-def do_the_thing(p):
+def run_amps_once(p):
     sig = 0
     for i in p:
         sig = list(Prog(prog).run(iter([i, sig])))[0]
     return sig
-print(max(do_the_thing(p) for p in itertools.permutations([0,1,2,3,4])))
+print(max(run_amps_once(p) for p in itertools.permutations([0,1,2,3,4])))
 
 
 # Part II
-def queue_iterator(q):
-    while True:
-        yield q.get()
-
-def do_thing2(p):
+def run_feedback_loop(p):
     queue1 = queue.Queue()
     queue1.put(p[0])
     queue1.put(0)
@@ -57,4 +53,4 @@ def do_thing2(p):
         queue1.put(i)
     return sig
 
-print(max(do_thing2(p) for p in itertools.permutations([5,6,7,8,9])))
+print(max(run_feedback_loop(p) for p in itertools.permutations([5,6,7,8,9])))
