@@ -1,5 +1,6 @@
 import sys
 import queue as q
+from utils import queue_iterator
 
 LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
@@ -22,8 +23,6 @@ for i in range(i_max - 2):
                     lines[i+d[2][0]][j+d[2][1]] == '.'):
                 portal = lines[i+d[0][0]][j+d[0][1]] + lines[i+d[1][0]][j+d[1][1]]
                 this_end = (i+d[2][0], j+d[2][1])
-                if portal == 'XF':
-                    print(this_end)
                 if portal in portals:
                     other_end = portals.pop(portal)
                     portals[this_end] = other_end
@@ -31,14 +30,12 @@ for i in range(i_max - 2):
                 else:
                     portals[portal] = this_end
 
+
+# Part I
 start = portals['AA']
 queue = q.Queue()
 queue.put(start)
 distance = { start: 0 }
-
-def queue_iterator(q):
-    while not q.empty():
-        yield q.get()
 
 for current in queue_iterator(queue):
     i, j = current
@@ -87,7 +84,6 @@ for current in queue_iterator(queue):
         else:
             i, j = portals[i, j]
             next_steps.append((i, j, level+1))
-
 
     for i, j, level in next_steps:
         if lines[i][j] == '.' and (i, j, level) not in distance:

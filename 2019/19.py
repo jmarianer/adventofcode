@@ -36,19 +36,19 @@ def get_stat(i, j):
 
 SIZE=50
 
-#tot = 0
-#for i in range(SIZE):
-#    for j in range(SIZE):
-#        out = get_stat(i, j)
-#        if out == 1:
-#            tot += 1
-#            print('#', end='')
-#        else:
-#            print('.', end='')
-#
-#    print()
-#
-#print(tot)
+tot = 0
+for i in range(SIZE):
+    for j in range(SIZE):
+        out = get_stat(i, j)
+        if out == 1:
+            tot += 1
+            print('#', end='')
+        else:
+            print('.', end='')
+
+    print()
+
+print(tot)
 
 # Part II
 current = (50, 50)
