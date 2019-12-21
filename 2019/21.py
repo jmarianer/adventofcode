@@ -1,4 +1,4 @@
-from intcode import Prog
+from intcode import AsciiProg
 import itertools, more_itertools
 
 prog = [109, 2050, 21101, 0, 966, 1, 21101, 0, 13, 0, 1106, 0, 1378, 21102, 20,
@@ -139,19 +139,10 @@ prog = [109, 2050, 21101, 0, 966, 1, 21101, 0, 13, 0, 1106, 0, 1378, 21102, 20,
 
 # Part I
 instructions = 'NOT A J\nNOT B T\nOR T J\nNOT C T\nOR T J\nAND D J\nWALK\n'
+for line in AsciiProg(prog).run(instructions):
+    print(line)
+
 # Part II
 instructions = 'NOT A J\nNOT B T\nOR T J\nNOT C T\nOR T J\nAND D J\nNOT H T\nNOT T T\nOR E T\nAND T J\nRUN\n'
-output = Prog(prog).run(ord(c) for c in instructions)
-print(more_itertools.last(output))
-output = (chr(i) for i in output)
-
-lines = more_itertools.split_at(output, lambda x: x == '\n')
-for line in lines:
-    print(''.join(line))
-
-for x in itertools.product('#.', repeat=9):
-    line = ''.join(x)
-    if line.startswith('.') or line.startswith('#...') or line[4] == '.':
-        continue
-    if '....' not in line:
-        print(line)
+for line in AsciiProg(prog).run(instructions):
+    print(line)

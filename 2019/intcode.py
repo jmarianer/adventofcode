@@ -1,3 +1,5 @@
+import more_itertools
+
 class Prog(list):
     def __setitem__(self, index, value):
         if index >= len(self):
@@ -66,3 +68,13 @@ class Prog(list):
 
             if not jumped:
                 self.cur += param_count[op] + 1
+
+
+class AsciiProg(Prog):
+    def run(self, inpt=''):
+        ascii_out = super().run(ord(c) for c in inpt)
+        for line in more_itertools.split_at(ascii_out, lambda x: x == 10):
+            if len(line) == 1:
+                yield(line[0])
+            else:
+                yield(''.join(chr(i) for i in line))

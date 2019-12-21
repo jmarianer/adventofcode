@@ -1,6 +1,8 @@
-from intcode import Prog
+from intcode import AsciiProg
 import more_itertools, time
 import numpy as np
+
+WANT_MORE_OUTPUT = False
 
 prog = [1, 330, 331, 332, 109, 4146, 1102, 1, 1182, 15, 1101, 1451, 0, 24,
         1002, 0, 1, 570, 1006, 570, 36, 102, 1, 571, 0, 1001, 570, -1, 570,
@@ -95,13 +97,12 @@ prog = [1, 330, 331, 332, 109, 4146, 1102, 1, 1182, 15, 1101, 1451, 0, 24,
         1, 46, 9, 18]
 
 # Part I
-camera_output = ''.join(chr(i) for i in Prog(prog).run())
-
-lines = camera_output.split('\n')
+lines = list(AsciiProg(prog).run())
 while lines[-1] == '':
     lines.pop()
-for line in lines:
-    print(line)
+if WANT_MORE_OUTPUT:
+    for line in lines:
+        print(line)
 
 alignment = 0
 for y in range(1, len(lines)-1):
@@ -115,28 +116,7 @@ for y in range(1, len(lines)-1):
 
 print(alignment)
 
-
-# Part II
-
-# Test output
-"""
-camera_output = '''#######...#####
-#.....#...#...#
-#.....#...#...#
-......#...#...#
-......#...###.#
-......#.....#.#
-^########...#.#
-......#.#...#.#
-......#########
-........#...#..
-....#########..
-....#...#......
-....#...#......
-....#...#......
-....#####......'''
-lines = camera_output.split('\n')
-"""
+# Part II preamble: calculate a long list of instructions
 lines = np.array([list(l) for l in lines])
 
 for y in range(len(lines)):
@@ -157,7 +137,8 @@ def cango(loc):
         return False
     return lines[tuple(loc)] == '#'
 
-current = 1
+current = None
+instructions = []
 while True:
     if cango(loc + speed):
         current += 1
@@ -166,7 +147,7 @@ while True:
 
     new_speed = (-speed[1], speed[0])
     if cango(loc + new_speed):
-        print(current, 'L', end='')
+        instructions.extend([current, 'L'])
         current = 1
         speed = new_speed
         loc += speed
@@ -174,25 +155,26 @@ while True:
 
     new_speed = (speed[1], -speed[0])
     if cango(loc + new_speed):
-        print(current, 'R', end='')
+        instructions.extend([current, 'R'])
         current = 1
         speed = new_speed
         loc += speed
         continue
     break
-print(current)
+instructions.append(current)
+
+instructions.pop(0)
+print(','.join(str(i) for i in instructions))
+
+# Part II: run the program. I hate to say it but I took the previous output and munged it manually in to the below.
+vacuum_instructions = 'B,A,B,C,A,B,C,B,C,A\nL,12,R,4,L,12,R,6\nL,12,L,8,L,8\nR,4,L,12,L,12,R,6\n' + ('y' if WANT_MORE_OUTPUT else 'n') + '\n'
 
 prog[0] = 2
-# I hate to say this but I calculated the below manually. :-(
-vacuum_instructions = 'B,A,B,C,A,B,C,B,C,A\nL,12,R,4,L,12,R,6\nL,12,L,8,L,8\nR,4,L,12,L,12,R,6\nn\n'
-camera_output = Prog(prog).run(ord(c) for c in vacuum_instructions)
-print(list(camera_output))
-
-lines = more_itertools.split_at(camera_output, lambda x: x == '\n')
-for line in lines:
-    if len(line) == 0:
-        time.sleep(0.1)
-    elif len(line) == 1:
-        print(ord(line[0]))
-    else:
-        print(''.join(line))
+lines = AsciiProg(prog).run(vacuum_instructions)
+if WANT_MORE_OUTPUT:
+    for line in lines:
+        if line == '':
+            time.sleep(0.1)
+        print(line)
+else:
+    print(more_itertools.last(lines))
