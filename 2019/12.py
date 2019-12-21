@@ -18,7 +18,4 @@ for _ in range(1000):
                     velocities[i][x] += 1
     positions += velocities
 
-tot = 0
-for i in range(4):
-    tot += sum(abs(positions[i])) * sum(abs(velocities[i]))
-print(tot)
+print(sum(sum(abs(positions[i])) * sum(abs(velocities[i])) for i in range(4)))

@@ -144,12 +144,14 @@ print(len([v for v in field.values() if v == 2]))
 # Part II
 display = ' █░▔*'
 
+PRINT_FIELD = False
 def input_iter():
     while True:
-#        for y in range(20):
-#            line = (display[field[x, y]] for x in range(50))
-#            print(''.join(line))
-        print(field[-1, 0], len([v for v in field.values() if v == 2]))
+        if PRINT_FIELD:
+            for y in range(20):
+                line = (display[field[x, y]] for x in range(50))
+                print(''.join(line))
+            print(field[-1, 0], len([v for v in field.values() if v == 2]))
 
         paddle, = [k for k, v in field.items() if v == 3]
         ball,   = [k for k, v in field.items() if v == 4]
@@ -159,9 +161,8 @@ def input_iter():
             yield 1
         else:
             yield 0
-        #time.sleep(0.1)
 
 prog[0] = 2
 for x, y, i in more_itertools.chunked(Prog(prog).run(input_iter()), 3):
     field[x, y] = i
-print(field[-1, 0], len([v for v in field.values() if v == 2]))
+print(field[-1, 0])

@@ -39,8 +39,10 @@ def ore_for_fuel(fuel_count):
 
     return want['ORE']
 
+# Part I
 print(ore_for_fuel(1))
 
+# Part II
 ORE_AVAILABLE = 1000000000000
 
 fuel = 1

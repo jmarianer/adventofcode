@@ -1,5 +1,6 @@
 from intcode import Prog
-import queue
+import queue, utils, more_itertools 
+from collections import defaultdict
 
 prog = [3, 8, 1005, 8, 299, 1106, 0, 11, 0, 0, 0, 104, 1, 104, 0, 3, 8,
         102, -1, 8, 10, 101, 1, 10, 10, 4, 10, 108, 1, 8, 10, 4, 10, 102, 1, 8, 28,
@@ -38,51 +39,45 @@ prog = [3, 8, 1005, 8, 299, 1106, 0, 11, 0, 0, 0, 104, 1, 104, 0, 3, 8,
         21102, 608, 1, 0, 106, 0, 483, 21202, -2, -1, -2, 22201, -4, -2, -4, 109,
         -5, 2105, 1, 0]
 
-canvas = [0] * 200
-for i in range(len(canvas)):
-    canvas[i] = [None] * 200
-    
-location = (100, 100)
-delta = (0, 1)
+def paint_canvas(initial_color):
+    canvas = defaultdict(lambda: None)
+    location = (0, 0)
+    delta = (0, 1)
+    my_queue = queue.Queue()
+    my_prog = Prog(prog).run(utils.queue_iterator(my_queue))
 
-# PART II
-# canvas[location[0]][location[1]] = 1
+    canvas[location[0], location[1]] = initial_color
+    my_queue.put(initial_color)
 
-def queue_iterator(q):
-    while True:
-        yield q.get()
+    for new_color, direction in more_itertools.chunked(my_prog, 2):
+        canvas[location] = new_color
 
-queue = queue.Queue()
-print(len(prog))
-prog = Prog(prog).run(queue_iterator(queue))
+        if direction == 1:
+            delta = (delta[1], -delta[0])
+        else:
+            delta = (-delta[1], delta[0])
+        location = (location[0] + delta[0], location[1] + delta[1])
 
-# TODO rewrite using more_itertools.chunked
-tot=0
-while True:
-    cur_color = canvas[location[0]][location[1]]
-    queue.put(0 if cur_color == None else cur_color)
-    new_color = next(prog, None)
-    if new_color == None:
-        break
-    canvas[location[0]][location[1]] = new_color
+        cur_color = canvas[location]
+        my_queue.put(0 if cur_color == None else cur_color)
 
-    tot+=1
+    return canvas
 
-    direction = next(prog)
-    if direction == 1:
-        delta = (delta[1], -delta[0])
-    else:
-        delta = (-delta[1], delta[0])
-    location = (location[0] + delta[0], location[1] + delta[1])
-print(tot)
+# Part I
+painted_starting_black = paint_canvas(0)
+print(len([v for v in painted_starting_black.values() if v is not None]))
 
-tot=0
-for l in canvas:
-    for k in l:
-        if k is not None:
-            tot+=1
+# Part II
+painted_starting_white = paint_canvas(1)
+min_x = min(x for x, y in painted_starting_white)
+max_x = max(x for x, y in painted_starting_white)
+min_y = min(y for x, y in painted_starting_white)
+max_y = max(y for x, y in painted_starting_white)
 
-print(tot)
+for y in reversed(range(min_y, max_y + 1)):
+    for x in range(min_x, max_x + 1):
+        k = painted_starting_white[x, y]
+        print('#' if k == 1 else ' ', end='')
+    print()
 
-for l in canvas:
-    print(''.join('#' if k == 1 else '.' for k in l))
+
