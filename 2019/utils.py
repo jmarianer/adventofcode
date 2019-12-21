@@ -1,3 +1,3 @@
 def queue_iterator(q):
-    while True:
+    while not q.empty():
         yield q.get()
