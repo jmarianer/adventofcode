@@ -1,3 +1,5 @@
+import sys
+
 orbits = {}
 
 def indirects(p):
@@ -5,19 +7,12 @@ def indirects(p):
         return []
     return [orbits[p]] + indirects(orbits[p])
 
-try:
-    for line in iter(input, None):
-        line = line.split(')')
-        orbits[line[1]] = line[0]
-except:
-    # End of input
-    pass
+for line in sys.stdin:
+    line = line.rstrip().split(')')
+    orbits[line[1]] = line[0]
 
 # Part I
-total = 0
-for p in orbits:
-    total += len(indirects(p))
-print(total)
+print(sum(len(indirects(p)) for p in orbits))
 
 # Part II
 l1 = list(reversed(indirects("YOU")))
