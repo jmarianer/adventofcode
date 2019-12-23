@@ -1,4 +1,3 @@
-# This code sucks!
 # I was feeling pretty Haskell-homesick when I wrote the answer to puzzle 7,
 # with the five instances feeding into each other. Not anymore! I have no idea
 # how I'd write this code functionally.
@@ -155,52 +154,53 @@ prog = [3, 62, 1001, 62, 11, 10, 109, 2235, 105, 1, 0, 866, 1686, 1593, 1717,
         2231, 68, 1101, 556, 0, 69, 1101, 0, 1, 71, 1101, 0, 2233, 72, 1105, 1,
         73, 1, 148, 34, 122601]
 
-progs = [0]*50
-queues = [0]*256
-for i in range(50):
-    queues[i] = q.Queue()
-queues[255] = q.Queue()
+progs = [Prog(prog) for _ in range(50)]
+queues = [q.Queue() for _ in range(50)]
+waiting_on_input = [0] * 50
+nat = None
+first_nat_output = True
+last_nat_y = None
 
 def get_input(i):
     yield i
     while True:
         if queues[i].empty():
+            waiting_on_input[i] += 1
             yield -1
         else:
-            yield queues[i].get()
-            yield queues[i].get()
+            for j in range(50):
+                waiting_on_input[j] = 0
+            x, y = queues[i].get()
+            yield x
+            yield y
 
-def thread_function(i):
-    my_prog = Prog(prog)
-    for out in more_itertools.chunked(my_prog.run(get_input(i)), 3):
-        n, x, y = out
-        queues[n].put(x)
-        queues[n].put(y)
-
-def nat():
-    x = queues[255].get()
-    y = queues[255].get()
-    print(y)
-    previous_y = -1
-    while True:
-        time.sleep(1)
-        if all(queues[i].empty() for i in range(50)):
-            while not queues[255].empty():
-                x = queues[255].get()
-                y = queues[255].get()
-            queues[0].put(x)
-            queues[0].put(y)
-            if y == previous_y:
-                print(y)
-            previous_y = y
-
-
-threads = [0]*50
 for i in range(50):
-    threads[i] = threading.Thread(target=thread_function, args=(i,))
-    threads[i].start()
-nat_thread = threading.Thread(target=nat)
-nat_thread.start()
-    
-for i in range(50):
-    threads[i].join()
+    progs[i].inpt = get_input(i)
+
+while True:
+    for i in range(50):
+        out = progs[i].perform_instruction()
+        if out is not None:
+            n = out
+            x = y = None
+            while x is None:
+                x = progs[i].perform_instruction()
+            while y is None:
+                y = progs[i].perform_instruction()
+            if n == 255:
+                if first_nat_output:
+                    # Answer to part I
+                    print(y)
+                    first_nat_output = False
+                nat = (x, y)
+            else:
+                queues[n].put((x, y))
+    if all(x > 100 for x in waiting_on_input) and nat is not None:
+        queues[0].put(nat)
+        x, y = nat
+        if y == last_nat_y:
+            # Answer to part II
+            print(y)
+            break
+        last_nat_y = y
+        nat = None

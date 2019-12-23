@@ -34,40 +34,52 @@ class Prog(list):
         else:
             self[param + self.rel] = val
 
+    def perform_instruction(self):
+        jumped = False
+        out = None
+        param_count = [0, 3, 3, 1, 1, 2, 2, 3, 3, 1]
+
+        op = self[self.cur] % 100
+        if op == 1:
+            self.set(3, self.get(1) + self.get(2))
+        elif op == 2:
+            self.set(3, self.get(1) * self.get(2))
+        elif op == 3:
+            self.set(1, next(self.inpt))
+        elif op == 4:
+            out = self.get(1)
+        elif op == 5:
+            if self.get(1) != 0:
+                self.cur = self.get(2)
+                jumped = True
+        elif op == 6:
+            if self.get(1) == 0:
+                self.cur = self.get(2)
+                jumped = True
+        elif op == 7:
+            self.set(3, 1 if self.get(1) < self.get(2) else 0)
+        elif op == 8:
+            self.set(3, 1 if self.get(1) == self.get(2) else 0)
+        elif op == 9:
+            self.rel += self.get(1)
+
+        if not jumped:
+            self.cur += param_count[op] + 1
+
+        return out
+
+    def program_done(self):
+        return self[self.cur] != 99
+
     def run(self, inpt=iter([])):
         self.cur = 0
         self.rel = 0
+        self.inpt = inpt
 
-        param_count = [0, 3, 3, 1, 1, 2, 2, 3, 3, 1]
-
-        while self[self.cur] != 99:
-            jumped = False
-            op = self[self.cur] % 100
-            if op == 1:
-                self.set(3, self.get(1) + self.get(2))
-            elif op == 2:
-                self.set(3, self.get(1) * self.get(2))
-            elif op == 3:
-                self.set(1, next(inpt))
-            elif op == 4:
-                yield self.get(1)
-            elif op == 5:
-                if self.get(1) != 0:
-                    self.cur = self.get(2)
-                    jumped = True
-            elif op == 6:
-                if self.get(1) == 0:
-                    self.cur = self.get(2)
-                    jumped = True
-            elif op == 7:
-                self.set(3, 1 if self.get(1) < self.get(2) else 0)
-            elif op == 8:
-                self.set(3, 1 if self.get(1) == self.get(2) else 0)
-            elif op == 9:
-                self.rel += self.get(1)
-
-            if not jumped:
-                self.cur += param_count[op] + 1
+        while not program_done():
+            out = perform_instruction()
+            if out is not None:
+                yield out
 
 
 class AsciiProg(Prog):
