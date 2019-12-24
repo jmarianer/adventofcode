@@ -36,3 +36,19 @@ def calc_digit(stepno, digitno):
 
 # Part I
 print(''.join(str(calc_digit(100, i)) for i in range(8)))
+
+
+# Part II
+# I finally realized (thanks to Reddit, not on my own :-() that this only needs
+# to work for large indexes; indexes so large that the pattern is just
+# 0000...111. Therefore we only need to calculate the cumulative sum from
+# position N to the end.
+start = int(''.join(str(inpt[i]) for i in range(7)))
+cur = inpt * 10000
+cur = cur[start:]
+for step in range(100):
+    for i in reversed(range(len(cur) - 1)):
+        #cur[i] = (cur[i] + cur[i+1]) % 10
+        cur[i] = cur[i] + cur[i+1]
+
+print(''.join(str(cur[i] % 10) for i in range(8)))
