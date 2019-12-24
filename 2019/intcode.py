@@ -69,15 +69,15 @@ class Prog(list):
         return out
 
     def program_done(self):
-        return self[self.cur] != 99
+        return self[self.cur] == 99
 
     def run(self, inpt=iter([])):
         self.cur = 0
         self.rel = 0
         self.inpt = inpt
 
-        while not program_done():
-            out = perform_instruction()
+        while not self.program_done():
+            out = self.perform_instruction()
             if out is not None:
                 yield out
 

@@ -1,8 +1,11 @@
 from intcode import Prog
+from utils import queue_iterator
 from more_itertools import nth
 from collections import defaultdict
 import time as time_
 import queue as q
+
+WANT_MORE_OUTPUT = False
 
 prog = [3, 1033, 1008, 1033, 1, 1032, 1005, 1032, 31, 1008, 1033, 2, 1032,
         1005, 1032, 58, 1008, 1033, 3, 1032, 1005, 1032, 81, 1008, 1033, 4,
@@ -68,19 +71,18 @@ prog = [3, 1033, 1008, 1033, 1, 1032, 1005, 1032, 31, 1008, 1033, 2, 1032,
         34, 98, 59, 87, 12, 73, 25, 74, 29, 95, 82, 51, 5, 81, 46, 51, 0, 0,
         21, 21, 1, 10, 1, 0, 0, 0, 0, 0, 0]
 
-def queue_iterator(q):
-    while not q.empty():
-        yield q.get()
-
 visited = set()
-queue = q.Queue()
-queue.put((0, 0, []))
-field = defaultdict(lambda: -1)
-distance_to_system = ''
+field = {}
+field[0, 0] = 1
+distance_to_system = None
 
-def printfield(field, location):
+def printfield(field, droid_location, distance_to_system, time):
     def display(location):
-        if field[location] == 0:
+        if location == droid_location:
+            return 'D'
+        elif location not in field:
+            return '▒'
+        elif field[location] == 0:
             return '█'
         elif field[location] == 1:
             return ' '
@@ -89,44 +91,61 @@ def printfield(field, location):
         elif field[location] == 3:
             return '░'
         else:
-            return '▒'
+            return 'X'
+
+    if not WANT_MORE_OUTPUT:
+        return
 
     minx = min(x for (x, y) in field.keys())
     maxx = max(x for (x, y) in field.keys())
     miny = min(y for (x, y) in field.keys())
     maxy = max(y for (x, y) in field.keys())
-    for y in range(miny, maxy + 1):
-        line = (display((x, y)) for x in range(minx, maxx + 1))
+    for y in range(miny - 1, maxy + 2):
+        line = (display((x, y)) for x in range(minx - 1, maxx + 2))
         print(''.join(line))
-    
-for x, y, directions in queue_iterator(queue):
+    print(distance_to_system, time)
+    time_.sleep(0.1)
+
+
+# Part I
+prog = Prog(prog)
+instructions = q.Queue()
+statii = prog.run(queue_iterator(instructions))
+def traverse(x, y, distance, direction, return_direction, previous_location):
     if (x, y) in visited:
-        continue
+        return
     visited.add((x, y))
 
-    if len(directions) == 0:
-        status = 1
-    else:
-        status = nth(Prog(prog).run(iter(directions + [1])), len(directions) - 1)
+    if direction is not None:
+        instructions.put(direction)
+        field[x, y] = status = next(statii)
+        if status == 0:
+            return
+        if status == 2:
+            global system_location
+            global distance_to_system
+            system_location = x, y
+            distance_to_system = distance
 
-    field[x, y] = status
+    printfield(field, (x, y), distance_to_system, None)
 
-    printfield(field, (x, y))
-    print(len(directions), distance_to_system)
+    # At this point, we are at location (x, y) and we know the status is either
+    # 1 or 2, i.e. we're not on a wall.
+    traverse(x, y+1, distance+1, 1, 2, (x, y))
+    traverse(x, y-1, distance+1, 2, 1, (x, y))
+    traverse(x+1, y, distance+1, 3, 4, (x, y))
+    traverse(x-1, y, distance+1, 4, 3, (x, y))
 
-    if status == 2:
-        system_location = x, y
-        distance_to_system = len(directions)
-    if status == 0:
-        continue
+    if return_direction is not None:
+        instructions.put(return_direction)
+        _ = next(statii)
+        printfield(field, previous_location, distance_to_system, None)
 
-    queue.put((x, y+1, directions + [1]))
-    queue.put((x, y-1, directions + [2]))
-    queue.put((x+1, y, directions + [3]))
-    queue.put((x-1, y, directions + [4]))
+traverse(0, 0, 0, None, None, None)
+print(distance_to_system)
 
 
-
+# Part II
 x, y = system_location
 queue = q.Queue()
 queue.put((x, y, 0))
@@ -135,12 +154,12 @@ for x, y, time in queue_iterator(queue):
     if field[x, y] not in {1, 2}:
         continue
     field[x, y] = 3
+    max_time = time
 
-    printfield(field, (x, y))
-    print(time)
-    time_.sleep(0.1)
+    printfield(field, None, distance_to_system, time)
     
     queue.put((x, y+1, time + 1))
     queue.put((x, y-1, time + 1))
     queue.put((x+1, y, time + 1))
     queue.put((x-1, y, time + 1))
+print(max_time)
