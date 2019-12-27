@@ -20,9 +20,9 @@ def calc_getting_to():
     getting_to = {}
     for origin, (i, j) in key_locations.items():
         queue = Queue()
-        queue.put((i, j, 0, []))
+        queue.put((i, j, 0, [], ''))
         visited = set()
-        for (i, j, distance, doors) in queue_iterator(queue):
+        for i, j, distance, doors, keys in queue_iterator(queue):
             if (i, j) in visited:
                 continue
             visited.add((i, j))
@@ -33,11 +33,12 @@ def calc_getting_to():
             if lines[i][j] in DOORS:
                 doors.append(lines[i][j])
             if lines[i][j] in KEYS:
-                getting_to[origin, lines[i][j]] = (distance, set(door.lower() for door in doors))
-            queue.put((i, j+1, distance+1, doors.copy()))
-            queue.put((i, j-1, distance+1, doors.copy()))
-            queue.put((i+1, j, distance+1, doors.copy()))
-            queue.put((i-1, j, distance+1, doors.copy()))
+                getting_to[origin, lines[i][j]] = (distance, set(door.lower() for door in doors), set(keys))
+                keys += lines[i][j]
+            queue.put((i, j+1, distance+1, doors.copy(), keys))
+            queue.put((i, j-1, distance+1, doors.copy(), keys))
+            queue.put((i+1, j, distance+1, doors.copy(), keys))
+            queue.put((i-1, j, distance+1, doors.copy(), keys))
     return getting_to, all_keys
 
 
@@ -64,9 +65,10 @@ for (distance, path) in queue_iterator(queue):
         break
 
     for next_key in all_keys - have_keys:
-        added_distance, need_keys = getting_to[current_key, next_key]
-        if need_keys.issubset(have_keys):
-            queue.put((distance + added_distance, path + next_key))
+        if (current_key, next_key) in getting_to:
+            added_distance, need_keys, new_keys = getting_to[current_key, next_key]
+            if need_keys.issubset(have_keys) and new_keys.issubset(have_keys):
+                queue.put((distance + added_distance, path + next_key))
 
 
 # Part II
@@ -103,8 +105,8 @@ for (distance, paths) in queue_iterator(queue):
     for i, current_key in enumerate(current_keys):
         for next_key in all_keys - have_keys:
             if (current_key, next_key) in getting_to:
-                added_distance, need_keys = getting_to[current_key, next_key]
-                if need_keys.issubset(have_keys):
+                added_distance, need_keys, new_keys = getting_to[current_key, next_key]
+                if need_keys.issubset(have_keys) and new_keys.issubset(have_keys):
                     paths1 = paths.copy()
                     paths1[i] = paths1[i] + next_key
                     queue.put((distance + added_distance, paths1))
