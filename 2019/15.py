@@ -1,5 +1,5 @@
 from intcode import Prog
-from utils import queue_iterator
+from utils import *
 from more_itertools import nth
 from collections import defaultdict
 import time as time_
@@ -146,20 +146,17 @@ print(distance_to_system)
 
 
 # Part II
-x, y = system_location
-queue = q.Queue()
-queue.put((x, y, 0))
-
-for x, y, time in queue_iterator(queue):
-    if field[x, y] not in {1, 2}:
-        continue
-    field[x, y] = 3
+def visit(point, time):
+    field[point] = 3
+    global max_time
     max_time = time
-
     printfield(field, None, distance_to_system, time)
-    
-    queue.put((x, y+1, time + 1))
-    queue.put((x, y-1, time + 1))
-    queue.put((x+1, y, time + 1))
-    queue.put((x-1, y, time + 1))
+
+
+max_time = 0
+a=basic_bfs(
+        origin=system_location,
+        should_visit=lambda point: field[point] in {1, 2},
+        nextsteps=nextsteps2d,
+        visit=visit)
 print(max_time)

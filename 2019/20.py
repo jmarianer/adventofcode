@@ -1,6 +1,6 @@
 import sys
 import queue as q
-from utils import queue_iterator
+from utils import *
 
 LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
@@ -32,61 +32,53 @@ for i in range(i_max - 2):
 
 
 # Part I
-start = portals['AA']
-queue = q.Queue()
-queue.put(start)
-distance = { start: 0 }
+distance = {}
 
-for current in queue_iterator(queue):
-    i, j = current
-    next_steps = [
-            (i, j+1),
-            (i, j-1),
-            (i+1, j),
-            (i-1, j),
-            ]
-    if current in portals:
-        next_steps.append(portals[current])
+def nextsteps(point):
+    for ns in nextsteps2d(point):
+        yield ns
+    if point in portals:
+        yield portals[point]
 
-    for i, j in next_steps:
-        if lines[i][j] == '.' and (i, j) not in distance:
-            distance[i, j] = distance[current] + 1
-            queue.put((i, j))
 
-print(distance[portals['ZZ']])
+def should_visit(point):
+    return lines[point[0]][point[1]] == '.'
+
+
+part1 = bfs_visited(
+        origin=portals['AA'],
+        should_visit=should_visit,
+        nextsteps=nextsteps,
+        destination=portals['ZZ'])
+
+print(part1)
 
 
 # Part II
 i, j = portals['AA']
-start = (i, j, 0)
+origin = (i, j, 0)
 i, j = portals['ZZ']
-end = (i, j, 0)
-queue = q.Queue()
-queue.put(start)
-distance = { start: 0 }
+destination = (i, j, 0)
 
-for current in queue_iterator(queue):
-    i, j, level = current
-    if current == end:
-        print(distance[current])
-        break
-    next_steps = [
-            (i, j+1, level),
-            (i, j-1, level),
-            (i+1, j, level),
-            (i-1, j, level),
-            ]
+def nextsteps_with_recursion(point):
+    i, j, level = point
+    for i1, j1 in nextsteps2d((i, j)):
+        yield (i1, j1, level)
     if (i, j) in portals:
         if i == 2 or j == 2 or i == i_max - 3 or j == j_max - 4:
             if level > 0:
                 i, j = portals[i, j]
-                next_steps.append((i, j, level-1))
+                yield (i, j, level-1)
         else:
             i, j = portals[i, j]
-            next_steps.append((i, j, level+1))
+            yield (i, j, level+1)
+            
 
-    for i, j, level in next_steps:
-        if lines[i][j] == '.' and (i, j, level) not in distance:
-            distance[i, j, level] = distance[current] + 1
-            queue.put((i, j, level))
 
+part2 = bfs_visited(
+        origin=origin,
+        should_visit=should_visit,
+        nextsteps=nextsteps_with_recursion,
+        destination=destination)
+
+print(part2)
