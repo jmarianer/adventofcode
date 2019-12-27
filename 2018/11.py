@@ -1,25 +1,27 @@
+# Make it zero-based instead. All coordinates get subtracted 1.
 def get_power_level(x, y, ser):
-    plev = ((x + 10) * y + ser) * (x + 10)
+    plev = ((x + 11) * (y + 1) + ser) * (x + 11)
     return (plev % 1000) // 100 - 5
+
+def sums(l, size):
+    cur_sum = sum(l[:size])
+    yield cur_sum
+    for i in range(size, len(l)):
+        cur_sum += l[i] - l[i - size]
+        yield cur_sum
 
 SERIAL_NUMBER = 7857
 power_levels = [
-        [get_power_level(x, y, SERIAL_NUMBER) for y in range(301)] 
-        for x in range(301)]
+        [get_power_level(x, y, SERIAL_NUMBER) for y in range(300)] 
+        for x in range(300)]
 
-best = 0
-coordinates = None
-for size in [3]:
-    for x in range(1, 300 - size + 2):
-        for y in range(1, 300 - size + 2):
-            total_power = sum(
-                    power_levels[x+dx][y+dy]
-                    #get_power_level(x+dx, y+dy, SERIAL_NUMBER)
-                    for dx in range(size)
-                    for dy in range(size))
-            if total_power > best:
-                best = total_power
-                coordinates = x, y, size
+coordinates = []
+for size in range(1, 301):
+    print(size)
+    vertical_sums = [sums(power_levels[x], size) for x in range(300 - size + 1)]
+    transposed_vertical = list(map(list, zip(*vertical_sums)))
+    horizontal_sums = [list(sums(transposed_vertical[y], size)) for y in range(300 - size + 1)]
+    coords = [(i, x+1, y+1, size) for y, h in enumerate(horizontal_sums) for x, i in enumerate(h)]
+    coordinates.append(max(coords))
 
-
-print(best, coordinates)
+print(max(coordinates))
