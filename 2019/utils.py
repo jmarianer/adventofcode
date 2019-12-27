@@ -29,14 +29,20 @@ def basic_bfs(origin, should_visit, nextsteps, visit, destination=None):
     return None
 
 
-def bfs_visited(origin, nextsteps, destination, should_visit):
+def bfs_visited(
+        origin,
+        nextsteps,
+        should_visit,
+        destination=None,
+        distill_for_visited=lambda x: x,
+        visit=lambda _1, _2: None):
     visited = set()
-    should_visit1 = lambda point: point not in visited and should_visit(point)
-    visit = lambda point, _: visited.add(point)
+    should_visit1 = lambda point: distill_for_visited(point) not in visited and should_visit(point)
+    visit1 = lambda point, distance: (visited.add(distill_for_visited(point)), visit(point, distance))
 
     return basic_bfs(
             origin=origin,
             should_visit=should_visit1,
             nextsteps=nextsteps,
-            visit=visit,
+            visit=visit1,
             destination=destination)

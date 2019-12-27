@@ -1,6 +1,6 @@
 import sys
 from queue import Queue, PriorityQueue
-from utils import queue_iterator
+from utils import *
 
 lines = sys.stdin.readlines()
 i_max = len(lines)
@@ -19,26 +19,38 @@ def calc_getting_to():
 
     getting_to = {}
     for origin, (i, j) in key_locations.items():
-        queue = Queue()
-        queue.put((i, j, 0, [], ''))
-        visited = set()
-        for i, j, distance, doors, keys in queue_iterator(queue):
-            if (i, j) in visited:
-                continue
-            visited.add((i, j))
-            if i < 0 or j < 0 or i > i_max or j > j_max:
-                continue
-            if lines[i][j] == '#':
-                continue
-            if lines[i][j] in DOORS:
-                doors.append(lines[i][j])
+        def visit(point, distance):
+            i, j, doors, keys = point
             if lines[i][j] in KEYS:
-                getting_to[origin, lines[i][j]] = (distance, set(door.lower() for door in doors), set(keys))
+                getting_to[origin, lines[i][j]] = (distance, set(doors), set(keys))
+        
+        def should_visit(point):
+            i, j, *_ = point
+
+            if i < 0 or j < 0 or i > i_max or j > j_max:
+                return False
+            return lines[i][j] != '#'
+
+        def nextsteps(point):
+            i, j, doors, keys = point
+            if lines[i][j] in DOORS:
+                doors += lines[i][j].lower()
+            if lines[i][j] in KEYS:
                 keys += lines[i][j]
-            queue.put((i, j+1, distance+1, doors.copy(), keys))
-            queue.put((i, j-1, distance+1, doors.copy(), keys))
-            queue.put((i+1, j, distance+1, doors.copy(), keys))
-            queue.put((i-1, j, distance+1, doors.copy(), keys))
+            for i1, j1 in nextsteps2d((i, j)):
+                yield (i1, j1, doors, keys)
+
+        def distill_for_visited(point):
+            i, j, doors, keys = point
+            return (i, j)
+
+        bfs_visited(
+                origin=(i, j, '', ''),
+                should_visit=should_visit,
+                visit=visit,
+                nextsteps=nextsteps,
+                distill_for_visited=distill_for_visited)
+
     return getting_to, all_keys
 
 
@@ -72,7 +84,6 @@ for (distance, path) in queue_iterator(queue):
 
 
 # Part II
-first = True
 for i, line in enumerate(lines):
     if '.@.' in line:
         j = line.find('.@.')
