@@ -59,29 +59,41 @@ def calc_getting_to():
 # realize what I should have done until I saw a reference online, and then it
 # suddenly became obvious.
 getting_to, all_keys = calc_getting_to()
-def nextsteps(path):
-    current_key = '@' if path == '' else path[-1]
-    have_keys = set(path)
+def nextsteps(paths):
+    current_keys = tuple(str(i) if path == '' else path[-1] for i, path in enumerate(paths))
+    if current_keys == ('0',):
+        current_keys = '@'
+    have_keys = set(key for path in paths for key in path if key in all_keys)
 
-    for next_key in all_keys - have_keys:
-        if (current_key, next_key) in getting_to:
-            distance, need_keys, new_keys = getting_to[current_key, next_key]
-            if need_keys.issubset(have_keys) and new_keys.issubset(have_keys):
-                yield path + next_key, distance
+    for i, current_key in enumerate(current_keys):
+        for next_key in all_keys - have_keys:
+            if (current_key, next_key) in getting_to:
+                distance, need_keys, new_keys = getting_to[current_key, next_key]
+                if need_keys.issubset(have_keys) and new_keys.issubset(have_keys):
+                    paths1 = paths.copy()
+                    paths1[i] += next_key
+                    yield paths1, distance
 
 
-def distill_for_visited(path):
-    current_key = '@' if path == '' else path[-1]
-    have_keys = set(path)
+def distill_for_visited(paths):
+    current_keys = tuple(str(i) if path == '' else path[-1] for i, path in enumerate(paths))
+    if current_keys == ('0'):
+        current_keys = '@'
+    have_keys = set(key for path in paths for key in path if key in all_keys)
 
-    return (current_key, ''.join(sorted(have_keys)))
+    return (current_keys, ''.join(sorted(have_keys)))
+
+
+def done(paths):
+    have_keys = set(key for path in paths for key in path if key in all_keys)
+    return have_keys == all_keys
 
 
 print(dijkstra_visited(
-        origin='',
+        origin=[''],
         nextsteps=nextsteps,
         distill_for_visited=distill_for_visited,
-        done=lambda path: set(path) == all_keys))
+        done=done))
 
 
 # Part II
@@ -96,29 +108,9 @@ for i, line in enumerate(lines):
         break
 
 
-visited = set()
-queue = PriorityQueue()
-queue.put((0, ['', '', '', '']))
-
 getting_to, all_keys = calc_getting_to()
-for (distance, paths) in queue_iterator(queue):
-    current_keys = tuple(str(i) if path == '' else path[-1] for i, path in enumerate(paths))
-
-    have_keys = set(key for path in paths for key in path if key in all_keys)
-    keys_string = ''.join(sorted(have_keys))
-    if (current_keys, keys_string) in visited:
-        continue
-    visited.add((current_keys, keys_string))
-
-    if have_keys == all_keys:
-        print(distance, paths)
-        break
-
-    for i, current_key in enumerate(current_keys):
-        for next_key in all_keys - have_keys:
-            if (current_key, next_key) in getting_to:
-                added_distance, need_keys, new_keys = getting_to[current_key, next_key]
-                if need_keys.issubset(have_keys) and new_keys.issubset(have_keys):
-                    paths1 = paths.copy()
-                    paths1[i] = paths1[i] + next_key
-                    queue.put((distance + added_distance, paths1))
+print(dijkstra_visited(
+        origin=[''] * 4,
+        nextsteps=nextsteps,
+        distill_for_visited=distill_for_visited,
+        done=done))
