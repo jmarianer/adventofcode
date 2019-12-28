@@ -58,29 +58,30 @@ def calc_getting_to():
 # Gah! I tried to DFS it when I should have used Dijkstra. Somehow I didn't
 # realize what I should have done until I saw a reference online, and then it
 # suddenly became obvious.
-visited = set()
-queue = PriorityQueue()
-queue.put((0, ''))
-
 getting_to, all_keys = calc_getting_to()
-for (distance, path) in queue_iterator(queue):
+def nextsteps(path):
     current_key = '@' if path == '' else path[-1]
-
     have_keys = set(path)
-    keys_string = ''.join(sorted(have_keys))
-    if (current_key, keys_string) in visited:
-        continue
-    visited.add((current_key, keys_string))
-
-    if have_keys == all_keys:
-        print(distance, path)
-        break
 
     for next_key in all_keys - have_keys:
         if (current_key, next_key) in getting_to:
-            added_distance, need_keys, new_keys = getting_to[current_key, next_key]
+            distance, need_keys, new_keys = getting_to[current_key, next_key]
             if need_keys.issubset(have_keys) and new_keys.issubset(have_keys):
-                queue.put((distance + added_distance, path + next_key))
+                yield path + next_key, distance
+
+
+def distill_for_visited(path):
+    current_key = '@' if path == '' else path[-1]
+    have_keys = set(path)
+
+    return (current_key, ''.join(sorted(have_keys)))
+
+
+print(dijkstra_visited(
+        origin='',
+        nextsteps=nextsteps,
+        distill_for_visited=distill_for_visited,
+        done=lambda path: set(path) == all_keys))
 
 
 # Part II
