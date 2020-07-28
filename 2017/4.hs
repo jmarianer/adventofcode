@@ -1,11 +1,5 @@
 import Data.List
-
--- From Data.List.Extra
-anySame :: Eq a => [a] -> Bool
-anySame = f []
-    where
-        f seen (x:xs) = x `elem` seen || f (x:seen) xs
-        f seen [] = False
+import Data.List.Extra
 
 main = do
   c <- getContents
