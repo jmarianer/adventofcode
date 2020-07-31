@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+import GHC.Exts
 import Data.Attoparsec.ByteString.Char8
 import Data.List
 import qualified Data.ByteString as BS
@@ -36,6 +37,17 @@ getParticle s = p
 absacc :: Particle -> Int
 absacc (Particle { acc = (x,y,z) }) = abs x + abs y + abs z
 
+add :: Triple -> Triple -> Triple
+add (x1, y1, z1) (x2, y2, z2) = (x1+x2, y1+y2, z1+z2)
+
+step :: Particle -> Particle
+step (Particle pos vel acc) = Particle (pos `add` vel `add` acc) (vel `add` acc) acc
+
+stepAll :: [Particle] -> [Particle]
+stepAll particles = removeCollisions $ map step particles
+
+removeCollisions = map head . filter (\l -> length l == 1) . groupWith pos . sortOn pos
+
 main = do
   c <- BS.getContents
   let lines = init $ C.split '\n' c
@@ -43,3 +55,6 @@ main = do
       absaccs = map absacc particles
       minacc = minimum absaccs
   print $ elemIndex minacc absaccs
+
+  -- 50 below is just a lucky guess...
+  print $ length $ (!!50) $ iterate stepAll particles
