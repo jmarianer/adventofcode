@@ -1,0 +1,30 @@
+cpy a b     first time around:
+dec b       a=7, b=6
+cpy a d  A: d=a
+cpy 0 a     
+cpy b c     a = b * d
+inc a       
+dec c
+jnz c -2
+dec d       
+jnz d -5
+dec b       b--
+cpy b c
+cpy c d     c = 2b (10, 8, 6, 4, 2)
+dec d       
+inc c       
+jnz d -2
+tgl c       Toggle every other line, ending at the jnz below
+cpy -16 c   first few times, goto A. By the time b==1, this is a no-op
+jnz 1 c
+cpy 80 c    c=80
+jnz 77 d    d=77
+inc a       a+=d*c
+inc d       
+jnz d -2
+inc c
+jnz c -5
+
+
+IOW calculate 7! + 80*77 = 5040 + 6160 = 11200
+Second part, calculate 12! + 6160 = 479007760
