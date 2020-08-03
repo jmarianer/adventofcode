@@ -42,13 +42,16 @@ bfs :: forall a b . (Ord a, Eq a) =>
        a -- start
     -> (a -> [(a, b)]) -- adjacency
     -> (a -> Bool) -- goal
+    -> Maybe Int -- Max depth
     -> Map.Map a [b] -- directions (to everywhere else in the graph)
-bfs start adjacency goal = bfs' (Map.singleton start []) (Seq.singleton start)
+bfs start adjacency goal depth = bfs' (Map.singleton start []) (Seq.singleton start)
   where bfs' :: Map.Map a [b] -> Seq.Seq a -> Map.Map a [b]
         bfs' directions Seq.Empty = directions
         bfs' directions (current Seq.:<| rest) =
           if goal current
           then directions
+          else if length currentDirections `gtMaybe` depth
+          then bfs' directions rest
           else bfs' (directions `Map.union` newDirections) newQueue
             where adjacent :: [(a, b)]
                   adjacent = filter (\(a, _) -> not $ a `Map.member` directions) $ adjacency current
@@ -58,3 +61,7 @@ bfs start adjacency goal = bfs' (Map.singleton start []) (Seq.singleton start)
                   newDirections = Map.fromList $ map (\(a, b) -> (a, b:currentDirections)) adjacent
                   newQueue :: Seq.Seq a
                   newQueue = rest Seq.>< Seq.fromList (map fst adjacent)
+                  gtMaybe :: Int -> Maybe Int -> Bool
+                  a `gtMaybe` Just b = a > b-1
+                  a `gtMaybe` nothing = False
+

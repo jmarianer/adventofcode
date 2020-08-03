@@ -31,6 +31,10 @@ adjacentAndOpen = filter valid . adjacent
 main = do
   -- debugging:
   -- TIO.putStrLn $ T.intercalate "\n" $ map (\y -> (T.pack $ map (\x -> draw $ open (x, y)) [0..9])) [0..9]
-  let directions = bfs (1, 1) adjacentAndOpen (== target)
+  let directions = bfs (1, 1) adjacentAndOpen (== target) Nothing
       Just dir = Map.lookup target directions
   print $ length $ dir
+
+  let directions = bfs (1, 1) adjacentAndOpen (== target) (Just 50)
+  print $ length $ Map.keys directions
+
