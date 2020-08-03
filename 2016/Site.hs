@@ -3,8 +3,11 @@
 
 module Site where
 
+import qualified Data.ByteString as BS
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
+import qualified Data.Text as T
+import Data.Text.Encoding
 
 data Direction = Up | Dn | Lt | Rt deriving (Show, Eq)
 
@@ -65,3 +68,7 @@ bfs start adjacency goal depth = bfs' (Map.singleton start []) (Seq.singleton st
                   a `gtMaybe` Just b = a > b-1
                   a `gtMaybe` nothing = False
 
+hashes :: (BS.ByteString -> BS.ByteString) -> T.Text -> [BS.ByteString]
+hashes hashfunc s = map hash [0..]
+  where hash :: Int -> BS.ByteString
+        hash n = hashfunc $ encodeUtf8 $ T.concat [s, T.pack $ show n]
