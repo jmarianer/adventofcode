@@ -1,4 +1,8 @@
 {-
+set b 57
+set c b
+jnz a 2        goto C in debug mode
+jnz 1 5
 mul b 100      b = 105700
 sub b -100000
 set c b
