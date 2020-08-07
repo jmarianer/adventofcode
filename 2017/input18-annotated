@@ -1,0 +1,41 @@
+set i 31
+set a 1
+mul p 17          Second program goes to A
+jgz p p
+mul a 2
+add i -1
+jgz i -2          Calculate i = 2^31-1
+add a -1
+set i 127
+set p 680         p=680
+mul p 8505     B: p = p*8505*129749 + 12345, all mod 2^32-1
+mod p a
+mul p 129749
+add p 12345
+mod p a
+set b p
+mod b 10000       Send that value % 10000
+snd b
+add i -1          Do that 127x
+jgz i -9          (goto B)
+jgz a 3           now goto A
+rcv b          D: This is going to deadlock eventually
+jgz b -1      
+set f 0        A: f=0; i=126     This is the beginning of the bubblesort duet. f=wasFlip; i=length
+set i 126
+rcv a             Receive a value
+rcv b          C: Receive another value
+set p a           
+mul p -1
+add p b
+jgz p 4           Calculate their maximum and send it back
+snd a
+set a b           Leave the minimum in a
+jgz 1 3
+snd b
+set f 1           f=1 if there was a swap
+add i -1          Go back to C 126 times
+jgz i -11
+snd a             Now we've calculated all the minima, i.e. sent back a slightly-more-sorted 
+jgz f -16         If there were any swaps, go back to A
+jgz a -19         Go to a rcv statement (D) and deadlock there.
