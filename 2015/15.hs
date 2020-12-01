@@ -20,6 +20,23 @@ addOne tuple = maximumBy (comparing mult) (map (add tuple) ingredients)
 
 zeros = (0, 0, 0, 0, 0)
 
+tuplesRep :: Int -> [a] -> [[a]]
+tuplesRep 0 _      = [[]]
+tuplesRep _ []     = []
+tuplesRep n (x:xs) =
+  map (x:) (tuplesRep (n-1) (x:xs)) ++ tuplesRep n xs
+  
+
 main = do
+  -- Greedy algorithm for the easy case
   let oneOfEach = foldl add zeros ingredients
-  print $ (iterate addOne oneOfEach) !! 96
+  print $ mult $ (iterate addOne oneOfEach) !! 96
+
+  -- Go over all the options for the 500cal case. This only takes around
+  -- half a minute even without the filter, so could have been used for
+  -- the first case as well.
+  let allPossible = map (foldl add zeros) $ tuplesRep 100 ingredients
+  print $ length allPossible
+  let all500s = filter (\(_, _, _, _, e) -> e == 500) allPossible
+  print $ length all500s
+  print $ maximum $ map mult all500s
