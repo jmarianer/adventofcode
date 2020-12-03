@@ -1,0 +1,8 @@
+[package]
+name = "aoc2020"
+version = "0.1.0"
+authors = ["Joey Marianer <me@joeym.org>"]
+edition = "2018"
+
+[dependencies]
+regex = "1"
