@@ -1,8 +1,7 @@
 use std::io::{self};
-mod day1;
-mod day3;
+mod day4;
 
 fn main() -> io::Result<()> {
-    day3::day3()?;
+    day4::day4()?;
     Ok(())
 }
