@@ -23,12 +23,14 @@ fn is_valid(passport: &HashMap<std::string::String, std::string::String>) -> boo
         false
     };
 
-    let hcl_re = Regex::new(r"^#[0-9a-f]{6}$").unwrap();
-    let ecl_set : HashSet<std::string::String> = ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].iter().map(|s| String::from(*s)).collect();
-    let pid_re = Regex::new(r"^[0-9]{9}$").unwrap();
+    lazy_static! {
+        static ref HCL_RE : Regex = Regex::new(r"^#[0-9a-f]{6}$").unwrap();
+        static ref ECL_SET : HashSet<std::string::String> = ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].iter().map(|s| String::from(*s)).collect();
+        static ref PID_RE : Regex = Regex::new(r"^[0-9]{9}$").unwrap();
+    }
 
     byr >= 1920 && byr <= 2002 && iyr >= 2010 && iyr <= 2020 && eyr >= 2020 && eyr <= 2030
-    && hcl_re.is_match(hcl) && ecl_set.contains(ecl) && pid_re.is_match(pid) && hgt_valid
+    && HCL_RE.is_match(hcl) && ECL_SET.contains(ecl) && PID_RE.is_match(pid) && hgt_valid
 }
 
 pub fn day4() -> io::Result<()> {
