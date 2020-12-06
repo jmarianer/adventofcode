@@ -2,9 +2,9 @@
 extern crate lazy_static;
 
 use std::io::{self};
-mod day5;
+mod day6;
 
 fn main() -> io::Result<()> {
-    day5::day5()?;
+    day6::day6()?;
     Ok(())
 }
