@@ -1,10 +1,10 @@
-#[macro_use]
+//#[macro_use]
 extern crate lazy_static;
 
 use std::io::{self};
-mod day4;
+mod day5;
 
 fn main() -> io::Result<()> {
-    day4::day4()?;
+    day5::day5()?;
     Ok(())
 }
