@@ -1,9 +1,9 @@
 use std::fs::File;
-use std::io::{self, BufRead, BufReader};
+use std::io::{BufRead, BufReader};
 use regex::Regex;
 
-pub fn day2() -> io::Result<()> {
-    let file = File::open("input2")?;
+pub fn day2() {
+    let file = File::open("input2").unwrap();
     let reader = BufReader::new(file);
     let lines = reader.lines();
 
@@ -19,7 +19,7 @@ pub fn day2() -> io::Result<()> {
         min <= count && count <= max
     }).count());
 
-    let file = File::open("input2")?;
+    let file = File::open("input2").unwrap();
     let reader = BufReader::new(file);
     let lines = reader.lines();
     println!("{}", lines.filter(|line| {
@@ -35,5 +35,4 @@ pub fn day2() -> io::Result<()> {
 
         (first_char == letter || second_char == letter) && first_char != second_char
     }).count());
-    Ok(())
 }

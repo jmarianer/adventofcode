@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs::File;
-use std::io::{self, BufRead, BufReader};
+use std::io::{BufRead, BufReader};
 use regex::Regex;
 
 fn is_valid(passport: &HashMap<std::string::String, std::string::String>) -> bool {
@@ -33,8 +33,8 @@ fn is_valid(passport: &HashMap<std::string::String, std::string::String>) -> boo
     && HCL_RE.is_match(hcl) && ECL_SET.contains(ecl) && PID_RE.is_match(pid) && hgt_valid
 }
 
-pub fn day4() -> io::Result<()> {
-    let file = File::open("input4")?;
+pub fn day4() {
+    let file = File::open("input4").unwrap();
     let reader = BufReader::new(file);
     let lines_orig = reader.lines().collect::<Vec<_>>();
 
@@ -62,6 +62,4 @@ pub fn day4() -> io::Result<()> {
     println!("{}", has_required.iter().filter(|passport| {
         is_valid(*passport)
     }).count());
-
-    Ok(())
 }

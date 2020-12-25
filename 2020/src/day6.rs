@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use std::fs::File;
-use std::io::{self, BufRead, BufReader};
+use std::io::{BufRead, BufReader};
 
 fn calculate_sum<F>(lines: &Vec<String>, func: F) -> usize
     where F: Fn(&HashSet<char>, &HashSet<char>) -> HashSet<char>
@@ -20,13 +20,11 @@ fn calculate_sum<F>(lines: &Vec<String>, func: F) -> usize
         .sum()
 }
 
-pub fn day6() -> io::Result<()> {
-    let file = File::open("input6")?;
+pub fn day6() {
+    let file = File::open("input6").unwrap();
     let reader = BufReader::new(file);
     let lines = reader.lines().map(|l| l.as_ref().unwrap().to_owned()).collect::<Vec<_>>();
 
     println!("{}", calculate_sum(&lines, |a, b| a.union(&b).cloned().collect()));
     println!("{}", calculate_sum(&lines, |a, b| a.intersection(&b).cloned().collect()));
-
-    Ok(())
 }

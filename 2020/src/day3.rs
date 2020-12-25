@@ -1,8 +1,8 @@
 use std::fs::File;
-use std::io::{self, BufRead, BufReader};
+use std::io::{Result, BufRead, BufReader};
 
 //fn check_slope_1<I>(lines: I, right: usize) -> usize where I : Iterator<Item = io::Result<String>> {
-fn check_slope_1(lines: &Vec<&io::Result<String>>, right: usize) -> usize {
+fn check_slope_1(lines: &Vec<&Result<String>>, right: usize) -> usize {
     lines.iter().enumerate().filter(|(i, line)| {
         let line = line.as_ref().unwrap();
         let ch   = line.chars().nth((i * right) % line.len()).unwrap();
@@ -10,8 +10,8 @@ fn check_slope_1(lines: &Vec<&io::Result<String>>, right: usize) -> usize {
     }).count()
 }
 
-pub fn day3() -> io::Result<()> {
-    let file = File::open("input3")?;
+pub fn day3() {
+    let file = File::open("input3").unwrap();
     let reader = BufReader::new(file);
     let lines_orig = reader.lines().collect::<Vec<_>>();
 
@@ -25,5 +25,4 @@ pub fn day3() -> io::Result<()> {
              check_slope_1(&lines, 5) *
              check_slope_1(&lines, 7) *
              check_slope_1(&every_other_line, 1));
-    Ok(())
 }
