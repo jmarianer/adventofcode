@@ -84,7 +84,7 @@ pub fn day24() {
     });
     println!("{}", &flipped.len());
 
-    for _ in 0..101 {
+    for _ in 0..100 {
         flipped = iterate_hex(flipped);
     }
     println!("{}", &flipped.len());

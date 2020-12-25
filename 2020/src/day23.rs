@@ -11,12 +11,10 @@ fn display(order : &Vec<(usize, usize)>) {
 }
 
 pub fn day23() {
-    // Sample input
-    //let mut order = vec![3, 8, 9, 1, 2, 5, 4, 6, 7];
-
     // Real input
     let mut order = vec![3, 1, 8, 9, 4, 6, 5, 7, 2];
 
+    // Naive version using vectors and way too many vector copies
     (0..100).for_each(|_| {
         let cur = order.remove(0);
         let mut dest_cup = cur;
@@ -34,7 +32,14 @@ pub fn day23() {
         order.splice(pos..pos, picked_up);
         order.push(cur);
     });
-    //dbg!(order);
+    loop {
+        let cur = order.remove(0);
+        if cur == 1 {
+            break;
+        }
+        order.push(cur);
+    }
+    println!("{}", order.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(""));
 
     // Part II
     let mut order : Vec<(usize, usize)> = Vec::new();
@@ -50,9 +55,7 @@ pub fn day23() {
     let last_cup = order.len();
 
     let mut cur_cup_idx = 0;
-    (0..10000000).for_each(|i| {
-        if i % 1000000 == 999999 { dbg!(i+1); }
-
+    (0..10000000).for_each(|_| {
         let cur = order[cur_cup_idx];
         let mut dest_cup = cur.0;
 
@@ -95,72 +98,9 @@ pub fn day23() {
     });
     let cup_1_pos = order.iter().position(|(cup, _next)| *cup == 1).unwrap();
     let next = order[cup_1_pos].1;
-    dbg!(order[next].0);
+    let cup1 = order[next].0;
     let next = order[next].1;
-    dbg!(order[next].0);
+    let cup2 = order[next].0;
 
-    dbg!(order[934000]);
-
-
-    /* Complete wild-goose chase
-    let mut order : LinkedList<CupAdapter> = LinkedList::new(CupAdapter::new());
-    for i in &[3, 1, 8, 9, 4, 6, 5, 7, 2] {
-        order.push_back(Box::new(Cup {
-            link: LinkedListLink::new(),
-            value: *i,
-        }));
-    }
-
-    let mut current_cup = order.front();
-    while !current_cup.is_null() {
-        dbg!(current_cup.get().unwrap().value);
-        current_cup.move_next();
-    }
-    current_cup.move_next();
-    dbg!(current_cup.get().unwrap().value);
-
-    let a = current_cup.get().unwrap();
-
-    let mut mu = order.front_mut();
-    mu.move_next();
-    mu.move_next();
-    mu.move_next();
-
-    unsafe { current_cup = order.cursor_from_ptr(a); }
-    while !current_cup.is_null() {
-        dbg!(current_cup.get().unwrap().value);
-        current_cup.move_next();
-    }
-    /*
-     * let a 
-
-    let mut cur = order.
-    for i in 10..1000001 {
-        order.push_back(Box::new(Cup {
-            link: LinkedListLink::new(),
-            value: i,
-        }));
-    }*/
-
-    /*
-    (0..100).for_each(|i| {
-        dbg!(i);
-
-        let cur = order.remove(0);
-        let mut dest_cup = cur;
-        let picked_up = order.splice(0..3, vec![]).collect::<Vec<_>>();
-        loop {
-            dest_cup -= 1;
-            if dest_cup == 0 {
-                dest_cup = 9;
-            }
-            if !picked_up.contains(&dest_cup) {
-                break;
-            }
-        }
-        let pos = order.iter().position(|x| *x == dest_cup).unwrap() + 1;
-        order.splice(pos..pos, picked_up);
-        order.push(cur);
-    });<F19><F18>*/*/
-
+    println!("{}", cup1 as u64 * cup2 as u64);
 }
