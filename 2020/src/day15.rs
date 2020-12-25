@@ -6,6 +6,10 @@ pub fn day15() {
     let mut last_time_spoken : HashMap<usize, usize> = HashMap::new();
     let mut last_spoken = 0;
     for i in 0..30000000 {
+        if i == 2020 {
+            // Part I
+            println!("{}", last_spoken);
+        }
         let next_to_speak = 
             if i < input.len() {
                 input[i] 
