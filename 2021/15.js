@@ -22,14 +22,13 @@ let maxX = risks.length
 let maxY = risks[0].length
 let shortest = Array.from({length: maxX}, () => Array.from({length: maxY}, () => -1))
 
-let queue = [[0, 0, 0]]
+let PriorityQueue = require('priorityqueuejs');
+let queue = new PriorityQueue((x, y) => y[2] - x[2])
 
-while (queue.length > 0) {
-  queue.sort((x, y) => x[2] - y[2])
-  let cur = queue.splice(0, 1)
-  x = cur[0][0]
-  y = cur[0][1]
-  dist = cur[0][2]
+queue.enq([0, 0, 0])
+
+while (queue.size() > 0) {
+  let [x, y, dist] = queue.deq()
   if (x < 0 || y < 0 || x >= maxX || y >= maxY) {
     continue
   }
@@ -38,10 +37,10 @@ while (queue.length > 0) {
   }
   dist += risks[x][y]
   shortest[x][y] = dist
-  queue.push([x+1, y, dist])
-  queue.push([x-1, y, dist])
-  queue.push([x, y+1, dist])
-  queue.push([x, y-1, dist])
+  queue.enq([x+1, y, dist])
+  queue.enq([x-1, y, dist])
+  queue.enq([x, y+1, dist])
+  queue.enq([x, y-1, dist])
 }
 
 // After writing this I realized that this might be wrong if the shortest path
