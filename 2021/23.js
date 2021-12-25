@@ -1,110 +1,194 @@
 'use strict'
 const PriorityQueue = require('priorityqueuejs');
 
-// Test input
+// Test input (part 1)
 //const original_state = '.......BCBDADCA'
+//const target_state = '.......ABCDABCD'
 
-// Real input
-const original_state = '.......DACDCABB'
+// Test input (part 2)
+//const original_state = '.......BCBDDCBADBACADCA'
+//const target_state = '.......ABCDABCDABCDABCD'
+
+//const original_state = 'ACA...B.CB.DCB.DBA.ADCD'
+
+// Real input (part 1)
+//const original_state = '.......DACDCABB'
+//const target_state = '.......ABCDABCD'
+
+// Real input (part 2)
+const original_state = '.......DACDDCBADBACCABB'
+const target_state = '.......ABCDABCDABCDABCD'
 
 
-const target_state = '.......ABCDABCD'
-
-// "lower" means the additional amount of energy to lower an amphipod into a
-// chamber that isn't its own. We do this if we must, but we probably won't
-// have to.
-const base_energy = { A: 1, B: 10, C: 100, D: 1000, lower: 1000000 }
+const base_energy = { A: 1, B: 10, C: 100, D: 1000 }
 
 
-const top_two_row_transitions = [
-  // Top row
-  [0, 1, 1],
-  [1, 0, 1],
-  [1, 2, 2],
-  [2, 1, 2],
-  [2, 3, 2],
-  [3, 2, 2],
-  [3, 4, 2],
-  [4, 3, 2],
-  [4, 5, 2],
-  [5, 4, 2],
-  [5, 6, 1],
-  [6, 5, 1],
+function log_state(state) {
+  let str = ''
+  for (let i = 0; i < state.length; i++) {
+    str += state[i]
+    if (i >= 6) {
+      if (i % 4 == 2) {
+        str += '\n  '
+      } else {
+        str += ' '
+      }
+    } else {
+      if (i >= 1 && i < 5) {
+        str += 'o'
+      }
+    }
+  }
+  console.log(str)
+}
 
-  // Top to second and back
-  [1, 7, 2],
-  [2, 7, 2],
-  [2, 8, 2],
-  [3, 8, 2],
-  [3, 9, 2],
-  [4, 9, 2],
-  [4, 10, 2],
-  [5, 10, 2],
-  [7, 1, 2],
-  [7, 2, 2],
-  [8, 2, 2],
-  [8, 3, 2],
-  [9, 3, 2],
-  [9, 4, 2],
-  [10, 4, 2],
-  [10, 5, 2],
-]
 
 function add_new_state(state, from, to, energy_to_here, energy) {
+  if (from >= state.length || to >= state.length) {
+    return
+  }
+
   let new_state = Array.from(state)
   new_state[to] = state[from]
   new_state[from] = '.'
 
-  // Add extra energy when lowering an amphipod into the wrong chamber.
-  if (to > 7 && to > from && state[from] !== target_state[to]) {
-    energy_to_here += base_energy.lower
+  if (to > 6 && to > from) {
+    // Don't lower an amphipod into the wrong chamber.
+    if (state[from] !== target_state[to]) {
+      return
+    }
+
+    // Don't lower it into the right chamber either, unless everything below it
+    // is correct.
+    let cur = to + 4
+    while (cur < state.length) {
+      if (state[cur] != target_state[cur]) {
+        return
+      }
+      cur += 4
+    }
   }
-  queue.enq([
-    new_state.join(''),
-    energy_to_here + energy * base_energy[state[from]]
-  ])
+  // Don't raise an amphipod from its chamber if it and all the ones under it
+  // are already done.
+  if (from > 7) {
+    let cur = from
+    while (cur < state.length) {
+      if (state[cur] != target_state[cur]) {
+        break
+      }
+      cur += 4
+    }
+    if (cur > state.length) {
+      return
+    }
+  }
+  new_state = new_state.join('')
+  let new_energy = energy_to_here + energy * base_energy[state[from]]
+  //console.log(new_energy)
+  //log_state(new_state)
+  queue.enq([new_state, new_energy, state])
 }
 
 
-// Entries in the queue: state, 
 let queue = new PriorityQueue((x, y) => y[1] - x[1])
 let visited = new Set()
-queue.enq([original_state, 0])
+let prev_state_map = {}
+queue.enq([original_state, 0, null])
 
 while (queue.size() > 0) {
-  let [state, energy_to_here] = queue.deq()
+  let [state, energy_to_here, prev_state] = queue.deq()
   if (visited.has(state)) {
     continue
   }
   visited.add(state)
+  prev_state_map[state] = [prev_state, energy_to_here]
 
   if (state === target_state) {
     console.log(energy_to_here)
     break
   }
 
-  if (energy_to_here > 100000) {
-    console.log('wat')
-    break
-  }
-
-  for (let [from, to, energy] of top_two_row_transitions) {
-    if (state[from] === '.' || state[to] !== '.') {
-      continue
-    }
-
-    add_new_state(state, from, to, energy_to_here, energy)
-  }
-
+  // Each move is either from a chamber to the top row or from the top row to a chamber.
   for (let chamber = 0; chamber < 4; chamber++) {
-    let row2 = chamber + 7
-    let row3 = chamber + 11
+    // The exit from the chamber is between two top-row points.
+    let between1 = chamber + 1
+    let between2 = chamber + 2
 
-    if (state[row2] === '.' && state[row3] !== '.') {
-      add_new_state(state, row3, row2, energy_to_here, 1)
+    // Chamber to top row:
+    // First, find the topmost place where there's an amphipod in the chamber
+    let down = chamber + 7
+    let energy_mult_up = 0
+    while (state[down] === '.' && down < state.length) {
+      down += 4
+      energy_mult_up++
     }
-    if (state[row2] !== '.' && state[row3] === '.') {
-      add_new_state(state, row2, row3, energy_to_here, 1)
+    if (down < state.length) {
+      // It takes two energy to get to between1
+      let energy_mult = 2
+      for (let up = between1; up >= 0; up--) {
+        if (state[up] === '.') {
+          add_new_state(state, down, up, energy_to_here, energy_mult_up + energy_mult)
+        } else {
+          break
+        }
+        energy_mult++
+        if (up != 1)
+          energy_mult++
+      }
+      energy_mult = 2
+      for (let up = between2; up <= 6; up++) {
+        if (state[up] === '.') {
+          add_new_state(state, down, up, energy_to_here, energy_mult_up + energy_mult)
+        } else {
+          break
+        }
+        energy_mult++
+        if (up != 5)
+          energy_mult++
+      }
+    }
+
+    // Top row to chamber
+    // Find out if there's an empty spot in the chamber
+    down = chamber + 7
+    let energy_mult1 = 0
+    while (state[down] === '.' && down < state.length) {
+      down += 4
+      energy_mult1++
+    }
+    down -= 4
+    energy_mult1--
+    if (energy_mult1 >= 0) {
+      let energy_mult2 = 2
+      for (let up = between1; up >= 0; up--) {
+        if (state[up] !== '.') {
+          add_new_state(state, up, down, energy_to_here, energy_mult1 + energy_mult2)
+          break
+        }
+        energy_mult2++
+        if (up != 1)
+          energy_mult2++
+      }
+      energy_mult2 = 2
+      for (let up = between2; up <= 6; up++) {
+        if (state[up] !== '.') {
+          add_new_state(state, up, down, energy_to_here, energy_mult1 + energy_mult2)
+          break
+        }
+        energy_mult2++
+        if (up != 5)
+          energy_mult2++
+      }
     }
   }
+}
+
+
+let state = target_state
+let energy
+while (state != null) {
+  let foo = prev_state_map[state]
+  console.log(foo[1])
+  log_state(state)
+  state = foo[0]
 }
