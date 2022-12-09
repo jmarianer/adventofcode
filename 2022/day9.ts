@@ -1,14 +1,7 @@
 type Point = [number, number];
 
-process.stdin.on('readable', () => {
-  const contents = process.stdin.read();
-  if (!contents) {
-    return;
-  }
-  const lines: string[] = contents.toString().split('\n');
-  lines.pop();
-
-  let knots: Point[] = [...Array(10)].map((_, i) => [0, 0]);
+function do_thing(lines: string[], tails: number): number {
+  let knots: Point[] = [...Array(tails + 1)].map((_, i) => [0, 0]);
   let visited = new Set<string>();
   for (const line of lines) {
     const [dir, count] = line.split(' ');
@@ -28,7 +21,7 @@ process.stdin.on('readable', () => {
           break;
       }
 
-      for (let tail = 1; tail < 2; tail++) {
+      for (let tail = 1; tail <= tails; tail++) {
         let hx = knots[tail-1][0], hy = knots[tail-1][1];
         let tx = knots[tail][0], ty = knots[tail][1];
 
@@ -45,9 +38,20 @@ process.stdin.on('readable', () => {
 
         knots[tail] = [tx, ty];
       }
-      visited.add(JSON.stringify(knots[1]));
+      visited.add(JSON.stringify(knots[tails]));
     }
   }
-  console.log(visited.size);
+  return visited.size;
+}
+
+process.stdin.on('readable', () => {
+  const contents = process.stdin.read();
+  if (!contents) {
+    return;
+  }
+  const lines: string[] = contents.toString().split('\n');
+  lines.pop();
+  console.log(do_thing(lines, 1));
+  console.log(do_thing(lines, 9));
 });
 
