@@ -1,3 +1,5 @@
+type Point = [number, number];
+
 process.stdin.on('readable', () => {
   const contents = process.stdin.read();
   if (!contents) {
@@ -6,39 +8,46 @@ process.stdin.on('readable', () => {
   const lines: string[] = contents.toString().split('\n');
   lines.pop();
 
-  let hx = 0, hy = 0, tx = 0, ty = 0;
+  let knots: Point[] = [...Array(10)].map((_, i) => [0, 0]);
   let visited = new Set<string>();
   for (const line of lines) {
     const [dir, count] = line.split(' ');
     for (let foo = 0; foo < +count; foo++) {
       switch (dir) {
         case 'R':
-          hx++;
+          knots[0][0]++;
           break;
         case 'U':
-          hy++;
+          knots[0][1]++;
           break;
         case 'L':
-          hx--;
+          knots[0][0]--;
           break;
         case 'D':
-          hy--;
+          knots[0][1]--;
           break;
       }
-      if (hx === tx && Math.abs(hy - ty) === 2) {
-        ty += Math.sign(hy - ty);
-      } else if (hy === ty && Math.abs(hx - tx) === 2) {
-        tx += Math.sign(hx - tx);
-      } else if (Math.abs(hy - ty) <= 1 && Math.abs(hx - tx) <= 1) {
-        // Touching; do nothing
-      } else {
-        ty += Math.sign(hy - ty);
-        tx += Math.sign(hx - tx);
+
+      for (let tail = 1; tail < 2; tail++) {
+        let hx = knots[tail-1][0], hy = knots[tail-1][1];
+        let tx = knots[tail][0], ty = knots[tail][1];
+
+        if (Math.abs(hy - ty) <= 1 && Math.abs(hx - tx) <= 1) {
+          // Touching; do nothing
+        } else if (hx === tx && Math.abs(hy - ty) === 2) {
+          ty += Math.sign(hy - ty);
+        } else if (hy === ty && Math.abs(hx - tx) === 2) {
+          tx += Math.sign(hx - tx);
+        } else {
+          ty += Math.sign(hy - ty);
+          tx += Math.sign(hx - tx);
+        }
+
+        knots[tail] = [tx, ty];
       }
-      console.log(hx, hy, tx, ty);
-      visited.add(`${tx},${ty}`);
+      visited.add(JSON.stringify(knots[1]));
     }
-    console.log(visited.size);
   }
+  console.log(visited.size);
 });
 
