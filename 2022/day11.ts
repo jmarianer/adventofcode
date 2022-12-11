@@ -7,6 +7,27 @@ interface monkey {
   inspectCount: number;
 };
 
+function doIt(monkeys: monkey[], cycles: number, op: (op: string, old: number) => number) {
+  for (let i = 0; i < cycles; i++) {
+    for (let monkey of monkeys) {
+      let items = monkey.items;
+      monkey.items = [];
+      for (let oldVal of items) {
+        let newVal = op(monkey.operation, oldVal);
+        if (newVal % monkey.testDiv == 0) {
+          monkeys[monkey.ifTrue].items.push(newVal);
+        } else {
+          monkeys[monkey.ifFalse].items.push(newVal);
+        }
+      }
+      monkey.inspectCount += items.length;
+    }
+  }
+
+  const sortedCounts = monkeys.map(m => m.inspectCount).sort((a, b) => b - a);
+  console.log(sortedCounts[0] * sortedCounts[1]);
+}
+
 process.stdin.on('readable', () => {
   let monkeys: monkey[] = [];
   const contents = process.stdin.read();
@@ -29,23 +50,13 @@ process.stdin.on('readable', () => {
     });
   }
 
-  console.log(monkeys);
-  for (let i = 0; i < 20; i++) {
-    for (let monkey of monkeys) {
-      let items = monkey.items;
-      monkey.items = [];
-      for (let old of items) {
-        let newVal = Math.floor(eval(monkey.operation) / 3);
-        if (newVal % monkey.testDiv == 0) {
-          monkeys[monkey.ifTrue].items.push(newVal);
-        } else {
-          monkeys[monkey.ifFalse].items.push(newVal);
-        }
-      }
-      monkey.inspectCount += items.length;
-    }
-  }
-  const sortedCounts = monkeys.map(m => m.inspectCount).sort((a, b) => b - a);
-  console.log(sortedCounts[0] * sortedCounts[1]);
+  // Part I
+  doIt(JSON.parse(JSON.stringify(monkeys)), 20, ((op, old) => Math.floor(eval(op) / 3)));
+
+  // Part II
+  let allDivs = monkeys.map(m => m.testDiv).reduce((a, b) => a * b);
+  doIt(JSON.parse(JSON.stringify(monkeys)), 10000, ((op, old) => eval(op) % allDivs));
+
+//        let newVal = eval(monkey.operation) % allDivs;
 });
 
