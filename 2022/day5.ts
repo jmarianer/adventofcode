@@ -1,3 +1,28 @@
+function part1(stacks: string[][], lines: string[]) {
+  for (let line of lines) {
+    let [_, count, fromStack, toStack] = line.split(/[a-z ]+/).map(x => +x);
+    let temp = [];
+    for (let i = 0; i < count; i++) {
+      stacks[toStack - 1].push(stacks[fromStack - 1].pop()!);
+    }
+  }
+  console.log(stacks.map(stack => stack.pop()).join(''));
+}
+
+function part2(stacks: string[][], lines: string[]) {
+  for (let line of lines) {
+    let [_, count, fromStack, toStack] = line.split(/[a-z ]+/).map(x => +x);
+    let temp = [];
+    for (let i = 0; i < count; i++) {
+      temp.push(stacks[fromStack - 1].pop()!);
+    }
+    for (let i = 0; i < count; i++) {
+      stacks[toStack - 1].push(temp.pop()!);
+    }
+  }
+  console.log(stacks.map(stack => stack.pop()).join(''));
+}
+
 process.stdin.on('readable', () => {
   const contents = process.stdin.read();
   if (!contents) {
@@ -21,12 +46,8 @@ process.stdin.on('readable', () => {
 
   lines = sections[1].split('\n');
   lines.pop();
-  for (let line of lines) {
-    let [_, count, fromStack, toStack] = line.split(/[a-z ]+/).map(x => +x);
-    for (let i = 0; i < count; i++) {
-      stacks[toStack - 1].push(stacks[fromStack - 1].pop()!);
-    }
-  }
-  console.log(stacks.map(stack => stack.pop()).join(''));
+
+  part1(JSON.parse(JSON.stringify(stacks)), lines);
+  part2(JSON.parse(JSON.stringify(stacks)), lines);
 });
 
