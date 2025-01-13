@@ -31,9 +31,19 @@ def bfs(mem)
 end
 
 puts bfs(fill_mem(all_bytes.take(1024)))
-(1025...).each { |i|
-  if !bfs(fill_mem(all_bytes.take(i)))
-    puts all_bytes[i-1]
-    break
+
+# Invariant: min <= first byte that doesn't work <= max
+min = 1024
+max = all_bytes.length
+
+while min < max
+  middle = (min + max) / 2
+
+  if bfs(fill_mem(all_bytes.take(middle)))
+    min = middle + 1
+  else
+    max = middle
   end
-}
+end
+puts all_bytes[max - 1]
+
